@@ -14,14 +14,13 @@ def encode_jwt(
         expire_timedelta: timedelta | None = None,
 ) -> str:
     to_encode = payload.copy()
-    now = datetime.utcnow()
     if expire_timedelta:
-        expire = now + expire_timedelta
+        expire = datetime.utcnow() + expire_timedelta
     else:
-        expire = now + timedelta(minutes=expire_minutes)
+        expire = datetime.utcnow() + timedelta(minutes=expire_minutes)
     to_encode.update(
         exp=expire,
-        iat=now,
+        iat=datetime.utcnow(),
     )
     encoded = jwt.encode(
         to_encode,
@@ -36,6 +35,13 @@ def decode_jwt(
         public_key: str = settings.auth_jwt.public_key_path.read_text(),
         algorithm: str = settings.auth_jwt.algorithm,
 ) -> dict:
+    """
+    Decode JWT token
+    :param token:
+    :param public_key:
+    :param algorithm:
+    :return: JWT payload or raise InvalidTokenError
+    """
     decoded = jwt.decode(
         token,
         public_key,
